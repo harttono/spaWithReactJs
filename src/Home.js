@@ -1,15 +1,70 @@
 import React,{Component} from 'react';
+import {Link} from 'react-router-dom';
+import Loading from './component/Loading';
+import Detail from './component/DetailProfile';
 class Home extends Component{
+    constructor(props) {
+        super(props); 
+        this.state = {
+            data:[],
+            loading:true,
+            showDetail:true
+        }
+     }
+    // fetching= (user) =>{
+    // this.setState({
+    //     loading:true
+    // })
+    //     fetch(`https://api.github.com/${user}?page=1&per_page=5`)
+    //     .then(res => res.json())
+    //     .then( data => this.setState({
+    //         loading:false,
+    //         data
+    //     }));
+    // }
+    componentDidUpdate(){
+        const closeBtn = document.querySelectorAll('.close');
+        closeBtn.forEach( function(el){
+            el.addEventListener("click",function(e){
+                e.target.parentElement.style.display='none'
+            })
+        })
+    }
+    componentDidMount(){
+        setTimeout( ()=>{
+        fetch('https://api.github.com/users?page=1&&per_page=5')
+        .then(res => res.json())
+        .then( data => this.setState({
+            loading:false,
+            data
+        })); 
+        },1000)
+    }
     render(){
+        let condition = '';
+        if(this.state.loading === true){
+            condition = <div className="loading-session"><Loading/></div>
+        }
         return(
-            <div>
-                <h2>Home</h2>
-                <p>At this time, results are ordered with the most recent following first — however,
-                    this ordering is subject to unannounced change and eventual consistency issues. 
-                    Results are given in groups of 20 users and multiple "pages" of results can be navigated through using the next_cursor value in subsequent requests. 
-                    See Using cursors to navigate collections for more information
-                </p>
+          <div className="container">
+          <header className="header">
+           <h1>Who to follow</h1>
+           <button type="button" className="refresh">Refresh</button>
+          </header>
+          {condition}
+          {
+            this.state.data.map(loop => 
+            <div className="dataFollower" key={loop.id}>
+            <img src={loop.avatar_url} alt="profile"></img>
+            <div className="UserSpace">
+            <Link to="/detail"><div className="user">{loop.login}</div></Link>
+            <div className="username">@{loop.login}</div>
             </div>
+            <button className="close">X</button>
+            </div>
+              )
+          }
+        </div>
         )
     }
 }
